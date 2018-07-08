@@ -6,7 +6,14 @@ Vue.use(Router)
 
 export default new Router({
   routes: [
-    { path:'/login',component: Login},
-    // { poth:'/',redirect:'/login' }
+    {
+      path: '/',
+      redirect: Login
+    },
+    {
+      name: Login,
+      path: '/login',
+      component: Login
+    }
   ]
 })
