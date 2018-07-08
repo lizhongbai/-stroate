@@ -24,7 +24,9 @@ export default {
 	},
 	methods:{
 	handelLogin () {
+		
 		this.$http.post('login', this.formDate)
+
 			.then( res=>{
 
 					const data = res.data
