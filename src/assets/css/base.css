@@ -3,7 +3,7 @@ body {
   height: 100%;
 }
 
-body {
+body ,html,h2,h3{
   margin: 0;
   padding: 0;
 }

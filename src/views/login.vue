@@ -26,14 +26,16 @@ export default {
 	handelLogin () {
 		this.$http.post('login', this.formDate)
 			.then( res=>{
-					console.log(res)
+
 					const data = res.data
-					console.log(data)
+
 					if(data.meta.status === 200) {
 
 							this.$message.success('登陆成功')
 
 							sessionStorage.setItem('token',data.data.token)
+							
+							this.$router.push('/home')
 					}else{
 							this.$message.error('登陆失败')
 					}
