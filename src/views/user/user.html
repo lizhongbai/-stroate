@@ -1,0 +1,146 @@
+<div class="userBac">
+    <el-breadcrumb separator-class="el-icon-arrow-right">
+        <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+        <el-breadcrumb-item>用户管理</el-breadcrumb-item>
+        <el-breadcrumb-item>用户列表</el-breadcrumb-item>
+    </el-breadcrumb>
+    <div style="margin: 15px 0;">
+        <el-input placeholder=" 请输入内容" class="input-with-select" v-model="search">
+            <el-button slot="append" icon="el-icon-search" @click="handleSearch"></el-button>
+        </el-input>
+                    <!--  添加弹出层 -->
+        <el-button round @click="dialogFormVisible = true">添加</el-button>
+        <el-dialog title="用户注册" :visible.sync="dialogFormVisible" width="700px">
+            <el-form :model="form" :rules="rules" ref="form">
+                <el-form-item label="用户名" :label-width="formLabelWidth" prop="username">
+                    <el-input v-model="form.username" auto-complete="off"></el-input>
+                </el-form-item>
+                <el-form-item label="密码" :label-width="formLabelWidth" prop="password">
+                    <el-input v-model="form.password" auto-complete="off" type="password"></el-input>
+                </el-form-item>
+                <el-form-item label="邮箱" :label-width="formLabelWidth" prop="email">
+                    <el-input v-model="form.email" auto-complete="off"></el-input>
+                </el-form-item>
+                <el-form-item label="电话" :label-width="formLabelWidth" prop="mobile">
+                    <el-input v-model="form.mobile" auto-complete="off"></el-input>
+                </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="handleUser_">取 消</el-button>
+                <el-button @click="resetForm('form')">重置</el-button>
+                <el-button type="primary" @click="handleUserAdd('form')">确 定</el-button>
+            </div>
+        </el-dialog>
+    </div>
+    <!-- 表格 -->
+    <el-table
+    v-loading="loading"
+    border
+    stripe
+    :data="userList"
+    style="width: 100%">
+        <el-table-column
+            type="index"
+            width="100">
+        </el-table-column>
+        <el-table-column
+            prop="username"
+            label="姓名"
+            width="200">
+        </el-table-column>
+        <el-table-column
+            prop="email"
+            label="邮箱"
+            width="200">
+        </el-table-column>
+        <el-table-column
+            prop="mobile"
+            label="电话"
+            width="200">
+        </el-table-column>
+        <el-table-column
+            label="创建时间"
+            width="200">
+            <template slot-scope="scope">
+                    {{ scope.row.create_time | dataForm }}
+            </template>
+        </el-table-column>
+        <el-table-column
+            prop="mg_state"
+            label="用户状态"
+            width="100">
+            <template slot-scope="scope">
+            <el-switch
+                @change="(val) => {
+                        handelSwitch(val, scope.row.id)
+                    }"
+                v-model="scope.row.mg_state"
+                active-color="#13ce66"
+                inactive-color="#ff4949"
+                class="user-swith">
+            </el-switch>
+            </template>
+        </el-table-column>
+            <el-table-column
+            prop=""
+            label="操作"
+            width="200">
+            <template slot-scope="scope">
+                <el-row class="user-btn">
+                <el-button type="primary" icon="el-icon-edit" circle size="mini" plain @click="handelUserAmend(scope.row)"></el-button>
+                <el-button type="danger" icon="el-icon-delete" circle size="mini" plain @click="handelUserDel(scope.row)"></el-button>
+                <el-button type="success" icon="el-icon-check" circle size="mini" plain @click="handelRele(scope.row)"></el-button>
+            </el-row>
+            </template>
+        </el-table-column>
+    </el-table>
+            <!-- 分页 -->
+    <div class="block">
+        <el-pagination
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+        :current-page="currentPage"
+        :page-sizes="[5,10]"
+        :page-size="pagesize"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="total">
+        </el-pagination>
+    </div>
+    <!--  修改用户信息 的弹出层 -->
+    <el-dialog title="修改" :visible.sync="dialogFormAmend" width="700px" >
+        <el-form :model="formAmend">
+            <el-form-item label="* 用户名" :label-width="formLabelWidth">
+                <el-input auto-complete="off" v-model="formAmend.username" disabled></el-input>
+            </el-form-item>
+            <el-form-item label="邮箱" :label-width="formLabelWidth">
+                <el-input  auto-complete="off" v-model="formAmend.email"></el-input>
+            </el-form-item>
+            <el-form-item label="电话" :label-width="formLabelWidth">
+                <el-input auto-complete="off" v-model="formAmend.mobile"></el-input>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button @click="dialogFormAmend = false">取 消</el-button>
+            <el-button type="primary" @click="userAmend">确 定</el-button>
+        </div>
+    </el-dialog>
+    <!-- 分配角色 -->
+    <el-dialog title="分配角色" :visible.sync="dialogFormRele">
+        <el-form :model="formRele">
+            <el-form-item label="用户姓名" :label-width="formLabelWidth">
+                <!-- <el-input auto-complete="off"></el-input> -->
+                <span>{{ formRele.username }}</span>
+            </el-form-item>
+            <el-form-item label="角色分配" :label-width="formLabelWidth">
+                <el-select v-model="currentId">
+                    <el-option label="请分配角色" :value="currentId" disabled></el-option>
+                    <el-option v-for="item in option" :label="item.roleName" :value="item.id"  :key="item.id" ></el-option>
+                </el-select>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button @click="dialogFormRele=false">取 消</el-button>
+            <el-button type="primary" @click="handelRele1">确 定</el-button>
+        </div>
+    </el-dialog>
+</div>
