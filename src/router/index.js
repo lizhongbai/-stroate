@@ -25,15 +25,15 @@ export default new Router({
       component:Home,
       children:[
         {
-          path: '/user',
+          path: '/users',
           component: User
         },
         {
-          path: '/rose',
+          path: '/roles',
           component: rose
         },
         {
-          path: '/permission',
+          path: '/rights',
           component: permission
         }
       ]

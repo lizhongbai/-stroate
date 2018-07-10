@@ -14,58 +14,35 @@
 			</el-row>
 		</el-header>
     <el-container class="container">
-      <el-aside class="aside" width="200px">
-				<el-row class="tac">
-					<el-col :span="24">
-						<el-menu
-							default-active="1"
-							router
-							class="homeAside">
-							<el-submenu index="1">
-								<template slot="title">
-									<i class="el-icon-location"></i>
-									<span>用户管理</span>
-								</template>
-									<el-menu-item index="/user">用户列表</el-menu-item>
-							</el-submenu>
-							<el-submenu index="2">
-								<template slot="title">
-									<i class="el-icon-location"></i>
-									<span>权限管理</span>
-								</template>
-									<el-menu-item index="/rose">角色列表</el-menu-item>
-									<el-menu-item index="/permission">权限列表</el-menu-item>
-							</el-submenu>
-							<el-submenu index="3">
-								<template slot="title">
-									<i class="el-icon-location"></i>
-									<span>商品管理</span>
-								</template>
-									<el-menu-item index="1-1">商品列表</el-menu-item>
-									<el-menu-item index="1-2">分类参数</el-menu-item>
-									<el-menu-item index="1-3">商品分类</el-menu-item>
-							</el-submenu>
-							<el-submenu index="4">
-								<template slot="title">
-									<i class="el-icon-location"></i>
-									<span>订单管理</span>
-								</template>
-									<el-menu-item index="1-1">订单列表</el-menu-item>
-							</el-submenu>
-							<el-submenu index="5">
-								<template slot="title">
-									<i class="el-icon-location"></i>
-									<span>数据统计</span>
-								</template>
-									<el-menu-item index="1-1">数据列表</el-menu-item>
-							</el-submenu>
-						</el-menu>
-					</el-col>
-				</el-row>
-			</el-aside>
-      <el-main class="main">
-				<router-view></router-view>
-			</el-main>
+		<el-aside class="aside" width="200px">
+			<el-row class="tac">
+				<el-col :span="24">
+					<el-menu
+						default-active="users"
+						router
+						class="homeAside">
+						<el-submenu 
+						v-for="(item,index) in homeList"
+						:key="item.id"
+						:index="index + '' ">
+							<template slot="title">
+								<i class="el-icon-location"></i>
+								<span >{{ item.authName }}</span>
+							</template>
+								<el-menu-item 
+								v-for="items in item.children"
+								:key="items.id"
+								:index="'/'+ items.path">
+								{{ items.authName }}
+								</el-menu-item>
+						</el-submenu>
+					</el-menu>
+				</el-col>
+			</el-row>
+		</el-aside>
+      	<el-main class="main">
+			<router-view></router-view>
+		</el-main>
     </el-container>
   </el-container>
 </template>
@@ -74,6 +51,8 @@
 export default {
 	data () {
 		return {
+			
+			homeList:[],
 			
 		}
 	},
@@ -88,6 +67,11 @@ export default {
 				this.$message('请先登陆宝贝')
 			}
 		},
+	created() {
+
+		this.getAllList()
+
+	},
 	methods:{
 		handleExit () {
 
@@ -117,6 +101,14 @@ export default {
 
 						})
 				})			
+		},
+		async getAllList() {
+
+			const res = await this.$http.get('menus')
+
+			// console.log(res)
+			this.homeList = res.data.data
+
 		}
 	}
 }
