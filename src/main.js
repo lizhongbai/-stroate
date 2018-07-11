@@ -6,6 +6,10 @@ import 'element-ui/lib/theme-chalk/index.css'
 import './assets/css/base.css'
 import MyAxios from './plugins/myasiox'
 import moment from 'moment'
+import myHeader from '@/components/myHeader.vue'
+
+Vue.component(myHeader.name,myHeader)
+
 Vue.config.productionTip = false
 Vue.use(ElementUI)
 Vue.use(MyAxios)
@@ -13,7 +17,6 @@ Vue.use(MyAxios)
 Vue.filter('dataForm',function(dataStr,pattern="YYYY-MM-DD HH:mm:ss"){
     return moment(dataStr).format(pattern)
 })
-
 
 /* eslint-disable no-new */
 new Vue({

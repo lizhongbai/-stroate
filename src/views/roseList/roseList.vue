@@ -14,29 +14,44 @@
             style="width: 100%">
         <el-table-column type="expand">
         <template slot-scope="props">
-            <el-form label-position="left" inline class="demo-table-expand">
-            <el-form-item label="商品名称">
-                <span></span>
-            </el-form-item>
-            <el-form-item label="所属店铺">
-                <span></span>
-            </el-form-item>
-            <el-form-item label="商品 ID">
-                <span></span>
-            </el-form-item>
-            <el-form-item label="店铺 ID">
-                <span></span>
-            </el-form-item>
-            <el-form-item label="商品分类">
-                <span></span>
-            </el-form-item>
-            <el-form-item label="店铺地址">
-                <span></span>
-            </el-form-item>
-            <el-form-item label="商品描述">
-                <span></span>
-            </el-form-item>
-            </el-form>
+             <!-- 一级 -->
+            <el-row  v-for=" item in props.row.children" :key="item.id" class="props1" >
+                <el-col :span="4">
+                        <el-tag    
+                            @close="closees(props.row,item.id)"
+                            closable>
+                            {{ item.authName }}
+                        </el-tag>
+                </el-col>
+                <!-- 二级 -->
+                <el-col :span="20">
+                    <el-row  v-for=" item1 in item.children" :key="item1.id" class="props2" >
+                        <el-col :span="4">
+                            <el-tag   
+                                @close="closees(props.row,item1.id)" 
+                                closable>
+                                {{ item1.authName }}
+                            </el-tag>
+                            <!-- 三级 --> 
+                        </el-col>
+                        <el-col :span="20">
+                            <el-row>
+                                <el-col :span="24">
+                                    <el-tag
+                                        @close="closees(props.row,item2.id)"
+                                        class="props3"
+                                        v-for=" item2 in item1.children" :key="item2.id"    
+                                        closable>
+                                        {{ item2.authName }}
+                                    </el-tag>   
+                                </el-col>          
+                            </el-row>
+                        </el-col>       
+                    </el-row>
+                 </el-col>
+            </el-row>
+            <!-- 没有权限 -->
+            <el-row v-if=" props.row.children.length === 0">没分配权限</el-row>
         </template>
         </el-table-column>
             <el-table-column
@@ -95,17 +110,19 @@
         </el-dialog>
         <!-- 角色授权弹出层 -->
         <el-dialog title="权限分配" :visible.sync="roseAccreditFormVisible" width="1000px">
-            <el-form >
-                <el-form-item label="角色名称" >
-                    <el-input  auto-complete="off"></el-input>
-                </el-form-item>
-                <el-form-item label="角色描述" >
-                    <el-input auto-complete="off" ></el-input>
-                </el-form-item>
-            </el-form>
+            <el-tree
+            ref="tree"
+            :data="data" 
+            show-checkbox
+            default-expand-all
+            node-key="id"
+            :default-checked-keys="checkedBoxArry"
+            :props="defaultProps" >
+
+            </el-tree>
             <div slot="footer" class="dialog-footer">
                 <el-button @click="roseAccreditFormVisible=false">取 消</el-button>
-                <el-button type="primary">确 定</el-button>
+                <el-button type="primary" @click="handelAddTree">确 定</el-button>
             </div>
         </el-dialog>
     </div>
@@ -115,6 +132,11 @@
 export default {
 	data() {
 		return {
+            data:[],
+            defaultProps: {
+                children: 'children',
+                label: 'authName'
+            },
             roseList:[],
             //添加的弹出层
             roseAddFormVisible: false,
@@ -129,11 +151,19 @@ export default {
             },
             // 角色授权弹出
             roseAccreditFormVisible: false,
+            // 角色授权
+            tags:[],
+            //默认选中1
+            checkedBoxArry:[],
+            roleId:-1,
 		}
     },
     created() {
 
         this.getAllRoseList()
+
+        this.getAllRoles()
+
 
     },
     methods:{
@@ -143,7 +173,7 @@ export default {
             const res = await this.$http.get('roles')
 
             this.roseList = res.data.data
-            console.log(res)
+
         },
         async roseListDel(user) {   //删除
 
@@ -233,11 +263,100 @@ export default {
             }
 
         },
-        handelAccredit(user) {
+        async handelAccredit(user) {  //角色授权查看
 
             this.roseAccreditFormVisible = true
 
+            var newArry = []
+            //第一层
+            user.children.forEach(item => {
+                
+                // newArry.push(item.id)
+                //第二层
+                item.children.forEach( item1 =>{
+
+                    // newArry.push(item1.id)
+                    //第三层
+                    item1.children.forEach( item2 =>{
+
+                        newArry.push(item2.id)
+
+                    })
+                })
+
+            })
+            
+            this.checkedBoxArry = newArry
+
+            const res = await this.$http.get('rights/tree')
+
+            const data = res.data
+
+            this.data  = data.data
+
+            this.roleId = user.id
+
         },
+        async handelAddTree() {  //确认角色授权
+
+            const roleid = this.roleId
+            //全选的的值， 返回的是数组
+            const checkedKeys = this.$refs.tree.getCheckedKeys()
+            //半选中的值， 返回的也是数组
+            const HalfCheckedKeys = this.$refs.tree.getHalfCheckedKeys()
+
+            const newAeryy = [...checkedKeys,...HalfCheckedKeys]
+
+            const { data:resData } = await this.$http.post(`roles/${roleid}/rights`,{
+
+                rids: newAeryy.join(',')
+
+            })
+
+             const { meta:{status,msg}} = resData
+
+             if(status ===200) {
+
+                this.roseAccreditFormVisible = false
+
+                this.$message.success('授权成功了')
+
+                this.getAllRoseList()
+
+             }else{
+
+                this.$message(msg)
+
+             }
+
+
+        },
+        async getAllRoles() {   //查查看角色分类
+
+            const res = await this.$http.get('roles')
+
+            this.tags = res.data.data           
+
+        },
+        async closees(user,roseId) {    //删除用户权限
+
+            const  userId = user.id
+
+            const res = await this.$http.delete(`roles/${userId}/rights/${roseId}`)
+
+            const data = res.data
+
+            const { meta:{status,msg} } = data
+
+            this.$message.success(msg)
+            //为什么实现的刷新？
+            user.children = data.data
+
+        },
+
+
+
+        
 
     }
 }
@@ -267,5 +386,15 @@ export default {
   .roseListTab {
       border-radius: 25px;
       box-shadow: 4px 3px 2px 2px #CCC;
+  }
+  .props1 {
+      padding: 5px;
+  }
+  .props2 {
+      padding:5px;
+  }
+  .props3 {
+      margin-right: 5px;
+      margin-bottom: 5px;
   }
 </style>

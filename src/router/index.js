@@ -6,6 +6,9 @@ import Home from '@/views/home'
 import User from '../views/user/user.vue'
 import rose from '../views/roseList/roseList.vue'
 import permission from '../views/permissionList/permissionList.vue'
+import category from '../views/goods/category/categories.vue'
+import goods from '../views/goods/goodsList/goods.vue'
+import params from '../views/goods/params/params.vue'
 
 Vue.use(Router)
 
@@ -35,6 +38,18 @@ export default new Router({
         {
           path: '/rights',
           component: permission
+        },
+        {
+          path: '/categories',
+          component: category
+        },
+        {
+          path: '/goods',
+          component: goods
+        },
+        {
+          path: '/params',
+          component: params
         }
       ]
     }
