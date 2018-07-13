@@ -9,6 +9,8 @@ import permission from '../views/permissionList/permissionList.vue'
 import category from '../views/goods/category/categories.vue'
 import goods from '../views/goods/goodsList/goods.vue'
 import params from '../views/goods/params/params.vue'
+import orders from '@/views/orders/orders.vue'
+import reports from '@/views/reports/reports.vue'
 
 Vue.use(Router)
 
@@ -50,6 +52,14 @@ export default new Router({
         {
           path: '/params',
           component: params
+        },
+        {
+          path: '/orders',
+          component: orders
+        },
+        {
+          path: '/reports',
+          component: reports
         }
       ]
     }
