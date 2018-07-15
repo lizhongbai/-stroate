@@ -61,17 +61,17 @@ export default {
 			
 		}
 	},
-	beforeCreate() {
+	// beforeCreate() {
 
-			const token =sessionStorage.getItem('token')
+	// 		const token =sessionStorage.getItem('token')
 
-			if(!token) {
+	// 		if(!token) {
 				
-				this.$router.push('/login')
+	// 			this.$router.push('/login')
 
-				this.$message('请先登陆宝贝')
-			}
-		},
+	// 			this.$message('请先登陆宝贝')
+	// 		}
+	// 	},
 	created() {
 
 		this.getAllList()

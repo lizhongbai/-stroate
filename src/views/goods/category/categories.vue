@@ -12,12 +12,13 @@
             border            
             style="width: 100%">
             <el-tree-grid
-            prop="cat_name"
-            treeKey="cat_id"
-            parentKey="cat_pid"
-            levelKey="cat_level"
-            childKey="children"
-            label="分类名称">             
+                prop="cat_name"
+                :indentSize="4"
+                treeKey="cat_id"
+                parentKey="cat_pid"
+                levelKey="cat_level"
+                childKey="children"
+                label="分类名称">             
             </el-tree-grid>
             <el-table-column
                 label="级别"
@@ -176,7 +177,6 @@ export default {
             
             const { data:resData } = await this.$http.get('categories?type=2')
 
-            console.log(resData)
             this.options = resData.data
         },
         async handelAddCategories() {   //添加分类
@@ -217,11 +217,15 @@ export default {
 
             const cat_id = user.cat_id
 
-            this.$confirm('是否永久删除数据',{
+            this.$confirm('是否永久删除数据','提示',{
+
+                confirmButtonText: '确定',
+
+                cancelButtonText: '取消',
 
                 type:'warning'
 
-            }).then(async() =>{
+            }).then (async()=>{
 
                 
                     const { data: resData } = await this.$http.delete(`categories/${cat_id}`)
@@ -240,6 +244,8 @@ export default {
 
                     }
 
+            }).catch(e=>{
+                console.log(e)
             })           
 
         },

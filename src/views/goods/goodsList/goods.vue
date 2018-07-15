@@ -2,10 +2,10 @@
     <div>
         <myHeader leave1="商品管理" leave2="商品列表"></myHeader>
         <div style="margin-top: 15px;">
-            <el-input placeholder="请输入内容" class="input-with-select">
-                <el-button slot="append" icon="el-icon-search"></el-button>
+            <el-input placeholder="请输入内容" class="input-with-select" v-model="search">
+                <el-button slot="append" icon="el-icon-search" @click="handelSearch"></el-button>
             </el-input>
-                <el-button type="success" plain>添加商品</el-button>
+                <el-button type="success" plain @click="handelAddEnter=$router.push('/goods/addGoods')">添加商品</el-button>
         </div>
         <!-- 恶心的表格 -->
         <el-table
@@ -45,8 +45,8 @@
                 label="操作">
                 <template slot-scope="scope">
                     <el-row class="user-btn">
-                        <el-button type="primary" icon="el-icon-edit" circle size="mini" plain ></el-button>
-                        <el-button type="danger" icon="el-icon-delete" circle size="mini" plain ></el-button>
+                        <el-button type="primary" icon="el-icon-edit" circle size="mini" plain @click="handelEdit(scope.row)"></el-button>
+                        <el-button type="danger" icon="el-icon-delete" circle size="mini" plain @click="handelDelete(scope.row)"></el-button>
                     </el-row>
                 </template>
             </el-table-column>
@@ -63,6 +63,33 @@
             :total="total">
             </el-pagination>
         </div>
+        <!-- 编辑 -->
+        <el-dialog title="收货地址" :visible.sync="goodEditFormVisible">
+            <el-form :model="form">
+                <el-form-item label="商品名称" >
+                <el-input v-model="form.goods_name" auto-complete="off"></el-input>
+                </el-form-item>               
+            </el-form>
+            <el-form :model="form">
+                <el-form-item label="价格" >
+                <el-input v-model="form.goods_price" auto-complete="off"></el-input>
+                </el-form-item>               
+            </el-form>
+            <el-form :model="form">
+                <el-form-item label="数量" >
+                <el-input v-model="form.goods_number" auto-complete="off"></el-input>
+                </el-form-item>               
+            </el-form>
+            <el-form :model="form">
+                <el-form-item label="重量" >
+                <el-input v-model="form.goods_weight" auto-complete="off"></el-input>
+                </el-form-item>               
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="goodEditFormVisible = false">取 消</el-button>
+                <el-button type="primary" @click="handelEditEnter">确 定</el-button>
+            </div>
+        </el-dialog>
     </div>
 </template>
 
@@ -76,6 +103,15 @@ export default {
             pagenum: 1,
             pagesize: 10,
             total:0,
+            //搜索
+            search:'',
+            //编辑的弹出框
+            goodEditFormVisible: false,
+            form:{
+                goods_name:'',
+                goods_price:''
+
+            }
         }
     },
     created() {
@@ -87,9 +123,8 @@ export default {
 
             this.loading = true
 
-            const { data:resData } = await this.$http.get(`goods?pagenum=${this.pagenum}&pagesize=${this.pagesize}`)
+            const { data:resData } = await this.$http.get(`goods?pagenum=${this.pagenum}&pagesize=${this.pagesize}&query=${this.search}`)
 
-            console.log(resData)
             const { meta:{ status, msg }} =resData
 
             if(status === 200) {
@@ -120,7 +155,62 @@ export default {
 
             this.getAllgoodsList()
 
-        }
+        },
+        handelSearch() {    //搜索
+
+            this.getAllgoodsList()
+
+        },
+        handelDelete(user) {  //删除
+
+            const goods_id = user.goods_id
+
+             this.$confirm('是否永久删除数据',{
+
+                type:'warning'
+
+            }).then(async() =>{
+               
+                const { data:resData } = await this.$http.delete(`goods/${goods_id}`)
+
+                const { meta:{ status,msg } } = resData
+
+                    if( status === 200 ) {
+
+                    this.$message.success(msg)
+
+                    this.getAllgoodsList()
+
+                }else{
+
+                    this.$message.error(msg)
+
+                }
+
+            }).catch(e=>{
+
+                console.log(e)
+
+            })
+
+        },
+        handelEdit(user) {  //编辑
+
+            this.goodEditFormVisible = true
+
+            console.log(user)
+
+            this.form = user
+
+        },
+        async handelEditEnter() {   //确认编辑
+
+            // const { data:resData } = await this.$http.put(`goods/${this.form.goods_id}`, this.form)
+
+            // console.log(resData)
+            this.$message.error('啥破接口文档')
+        },
+
 
     }
 }

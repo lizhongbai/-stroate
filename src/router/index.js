@@ -11,17 +11,20 @@ import goods from '../views/goods/goodsList/goods.vue'
 import params from '../views/goods/params/params.vue'
 import orders from '@/views/orders/orders.vue'
 import reports from '@/views/reports/reports.vue'
+import addGoods from '@/views/goods/goodsList/addGoods.vue'
+//导入提示
+import { Message } from 'element-ui'
 
 Vue.use(Router)
 
-export default new Router({
+const router = new Router({
   routes: [
     {
       path: '/',
       redirect: '/home'
     },
     {
-      name: Login,
+      name:'login',
       path: '/login',
       component: Login
     },
@@ -60,8 +63,45 @@ export default new Router({
         {
           path: '/reports',
           component: reports
+        },
+        {
+          path: '/goods/addGoods',
+          component: addGoods
         }
       ]
     }
   ]
 })
+
+//路由的前置对象
+router.beforeEach((to, from, next) => {
+    // to and from are both route objects
+    // console.log(to,from)
+  //判断当前访问的路由是否是login,如果是login直接next
+  if( to.name === 'login') {
+
+    next()
+    
+  } else {
+
+    //判断有没有token
+    const token = sessionStorage.getItem('token')
+    
+    if(!token) {
+
+      router.push('/login')
+
+	   Message.warning('请先登陆宝贝')
+
+      return
+
+    }
+
+    next()
+    
+  }
+
+
+})
+
+export default router
